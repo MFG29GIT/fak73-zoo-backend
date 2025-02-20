@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { Enclosure } from "../models/enclosures.js";
 import { pool } from "../clients/pool.js";
-import type { patchEnclosureBody } from "../../types.js";
+import type { patchEnclosureBody } from "../types.js";
 
 export const enclosure = new Hono();
 

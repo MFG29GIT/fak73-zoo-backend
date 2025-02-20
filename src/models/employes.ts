@@ -1,5 +1,5 @@
 import type { QueryConfig } from "pg";
-import type { AnimalType, StaffType } from "../../types.js";
+import type { AnimalType, StaffType } from "../types.js";
 import { pool } from "../clients/pool.js";
 import { HTTPException } from "hono/http-exception";
 

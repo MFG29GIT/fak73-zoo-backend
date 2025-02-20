@@ -1,7 +1,7 @@
 import type { QueryConfig } from "pg";
-import type { AnimalType } from "../../types.js";
 import { pool } from "../clients/pool.js";
 import { HTTPException } from "hono/http-exception";
+import type { AnimalType } from "../types.js";
 
 export class Animal {
   static async findAll() {

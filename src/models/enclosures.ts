@@ -4,7 +4,7 @@ import type {
   EnclosureType,
   patchEnclosureBody,
   StaffType,
-} from "../../types.js";
+} from "../types.js";
 import { pool } from "../clients/pool.js";
 import { HTTPException } from "hono/http-exception";
 
