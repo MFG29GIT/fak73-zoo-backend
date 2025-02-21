@@ -6,7 +6,6 @@ import type {
   StaffType,
 } from "../types.js";
 import { pool } from "../clients/pool.js";
-import { HTTPException } from "hono/http-exception";
 
 export class Enclosure {
   static async findAll() {

@@ -43,7 +43,7 @@ export class Animal {
 
   // Tier einem Gehege zuweisen
   // POST /animals/1/assign-compound?compoundId=1
-  static async assignAnimal(animalId: string, compoundId: number) {
+  static async assignAnimal(animalId: number, enclosureId: number) {
     // Zuerst prüfen, ob das Tier existiert
     const animalQueryResult = await pool.query(
       'SELECT * FROM "Tier" WHERE id = $1',
@@ -58,18 +58,18 @@ export class Animal {
     // Prüfen, ob das Gehege existiert
     const compoundQueryResult = await pool.query(
       'SELECT * FROM "Gehege" WHERE id = $1',
-      [compoundId]
+      [enclosureId]
     );
     if (compoundQueryResult.rowCount === 0) {
       throw new HTTPException(404, {
-        message: `Compound with id ${compoundId} does not exist!`,
+        message: `Compound with id ${enclosureId} does not exist!`,
       });
     }
 
     // Das Tier im Gehege zuweisen (Update)
     const updateResult = await pool.query(
       'UPDATE "Tier" SET gehege_id = $1 WHERE id = $2 RETURNING *',
-      [compoundId, animalId]
+      [enclosureId, animalId]
     );
 
     // Falls kein Tier aktualisiert wurde
@@ -84,7 +84,7 @@ export class Animal {
   }
 
   // Tier einem Tierarzt zuweisen
-  static async assignVet(animalId: string, personalId: number) {
+  static async assignVet(animalId: number, personalId: number) {
     // Zuerst prüfen ob das Tier existiert
     const animalQueryResult = await pool.query(
       'SELECT * FROM "Tier" WHERE id = $1',

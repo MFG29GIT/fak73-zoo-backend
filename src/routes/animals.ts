@@ -60,17 +60,17 @@ animal.delete("/:id", async (c) => {
 // Tier einem Gehege zuweisen
 animal.post("/:id/assign-compound", async (c) => {
   try {
-    const { id } = c.req.param();
-    const compoundId = Number(c.req.query("compoundId"));
+    const id = Number(c.req.param().id);
+    const enclosureId = Number(c.req.query("compoundId"));
 
-    if (isNaN(compoundId)) {
+    if (isNaN(enclosureId)) {
       return c.json(
         { message: "Query parameter 'compoundId' must be a valid number" },
         400
       );
     }
 
-    const updatedAnimal = await Animal.assignAnimal(id, compoundId);
+    const updatedAnimal = await Animal.assignAnimal(id, enclosureId);
 
     return c.json({ data: updatedAnimal }, 200);
   } catch (err) {
@@ -82,7 +82,7 @@ animal.post("/:id/assign-compound", async (c) => {
 // Tier einem Tierarzt zuweisen
 animal.post("/:id/assign-veterinarian", async (c) => {
   try {
-    const { id } = c.req.param();
+    const id = Number(c.req.param().id);
     const personalId = Number(c.req.query("personalId"));
 
     if (isNaN(personalId)) {

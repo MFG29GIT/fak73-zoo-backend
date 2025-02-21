@@ -5,7 +5,7 @@ import type { patchEnclosureBody } from "../types.js";
 
 export const enclosure = new Hono();
 
-// Alle Tiere abrufen
+// Alle Enclosures abrufen
 enclosure.get("/", async (c) => {
   try {
     const enclosures = await Enclosure.findAll();
@@ -16,7 +16,7 @@ enclosure.get("/", async (c) => {
   }
 });
 
-// Tier mit ID abrufen
+// Enclosure mit ID abrufen
 enclosure.get("/:id", async (c) => {
   try {
     const { id } = c.req.param();
@@ -33,7 +33,7 @@ enclosure.get("/:id", async (c) => {
   }
 });
 
-// Neues Tier einfügen
+// Neues Enclosure einfügen
 enclosure.post("/insertEn", async (c) => {
   try {
     const body = await c.req.json();
@@ -46,7 +46,7 @@ enclosure.post("/insertEn", async (c) => {
   }
 });
 
-// Tier Löschen(verstorben)
+// Enclosure Löschen(verstorben)
 enclosure.delete("/:id", async (c) => {
   try {
     const { id } = c.req.param();
