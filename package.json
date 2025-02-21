@@ -2,7 +2,7 @@
   "name": "fak73-zoo",
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "bun build src/index.ts --target node --outdir dist",
     "dev": "npx tsx src/index.ts"
   },
   "dependencies": {
