@@ -4,6 +4,7 @@ import { config } from "dotenv";
 import { animal } from "./routes/animals.js";
 import { employe } from "./routes/employes.js";
 import { cors } from "hono/cors";
+import { enclosure } from "./routes/enclosures.js";
 config();
 
 const app = new Hono();
@@ -12,6 +13,7 @@ app.use("*", cors());
 app.get("/", (c) => c.text("Hello Hono"));
 app.route("/animals", animal);
 app.route("/employes", employe);
+app.route("/enclosures", enclosure);
 
 serve(
   {
