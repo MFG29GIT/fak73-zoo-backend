@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { Employe } from "../models/employes.js";
+import { EmployeSchema } from "../schemas/employe.js";
 
 export const employe = new Hono();
 
@@ -35,12 +36,23 @@ employe.get("/:id", async (c) => {
 employe.post("/insertEmp", async (c) => {
   try {
     const body = await c.req.json();
-    const newEmploye = await Employe.insertEmploye(body);
+    const result = EmployeSchema.safeParse(body);
+
+    if (result.success === false) {
+      return c.json({ error: result.error.flatten().fieldErrors });
+    }
+    // Here we got safe valid data!
+
+    const newEmploye = await Employe.insertEmploye(result.data);
 
     return c.json({ data: newEmploye }, 201);
-  } catch (err) {
-    console.error("❌ Fehler beim Einfügen:", err);
-    return c.json({ message: "Fehler beim Einfügen des Mitarbeiters" }, 500);
+  } catch (error) {
+    console.error(error);
+    if (error instanceof SyntaxError) {
+      return c.json({ error: "Well, thats not JSON my friend." });
+    }
+    // not handled errors
+    return c.json({ error: "Oh Snap. Server Error" });
   }
 });
 

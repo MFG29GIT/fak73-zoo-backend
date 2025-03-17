@@ -1,7 +1,11 @@
 import { Hono } from "hono";
 import { Enclosure } from "../models/enclosures.js";
 import { pool } from "../clients/pool.js";
-import type { patchEnclosureBody } from "../types.js";
+import { EnclosureSchema } from "../schemas/enclosures.js";
+import {
+  PatchEnclosureBodySchema,
+  type PatchEnclosureBodyType,
+} from "../schemas/patchEnclosureBody.js";
 
 export const enclosure = new Hono();
 
@@ -37,12 +41,21 @@ enclosure.get("/:id", async (c) => {
 enclosure.post("/insertEn", async (c) => {
   try {
     const body = await c.req.json();
-    const newEnclosure = await Enclosure.insertEmploye(body);
+    const result = EnclosureSchema.safeParse(body);
 
+    if (result.success === false) {
+      return c.json({ error: result.error.flatten().fieldErrors });
+    }
+
+    const newEnclosure = await Enclosure.insertEnclosure(result.data);
     return c.json({ data: newEnclosure }, 201);
-  } catch (err) {
-    console.error("❌ Fehler beim Einfügen:", err);
-    return c.json({ message: "Fehler beim Einfügen des Geheges" }, 500);
+  } catch (error) {
+    console.error(error);
+    if (error instanceof SyntaxError) {
+      return c.json({ error: "Well, thats not JSON my friend." });
+    }
+    // not handled errors
+    return c.json({ error: "Oh Snap. Server Error" });
   }
 });
 
@@ -53,9 +66,13 @@ enclosure.delete("/:id", async (c) => {
     const newEnclosure = await Enclosure.deleteById(id);
 
     return c.json({ data: newEnclosure }, 201);
-  } catch (err) {
-    console.error("❌ Fehler beim Löschen:", err);
-    return c.json({ message: "Fehler beim Löschen des Geheges" }, 500);
+  } catch (error) {
+    console.error(error);
+    if (error instanceof SyntaxError) {
+      return c.json({ error: "Well, thats not JSON my friend." });
+    }
+    // not handled errors
+    return c.json({ error: "Oh Snap. Server Error" });
   }
 });
 
@@ -63,11 +80,22 @@ enclosure.delete("/:id", async (c) => {
 enclosure.patch("/:id", async (c) => {
   try {
     const { id } = c.req.param();
-    const patchBody = (await c.req.json()) as patchEnclosureBody;
+    const patchBody = await c.req.json();
 
-    const patchedEnclosure = await Enclosure.patchEnclosure(id, patchBody);
-  } catch (err) {
-    console.error("❌ Fehler beim bearbeiten des Geheges:", err);
-    return c.json({ message: "Fehler beim bearbeiten des Geheges" }, 500);
+    const result = PatchEnclosureBodySchema.safeParse(patchBody);
+
+    if (result.success === false) {
+      return c.json({ error: result.error.flatten().fieldErrors });
+    }
+    // Here we got safe valid data!
+
+    const patchedEnclosure = await Enclosure.patchEnclosure(id, result.data);
+  } catch (error) {
+    console.error(error);
+    if (error instanceof SyntaxError) {
+      return c.json({ error: "Well, thats not JSON my friend." });
+    }
+    // not handled errors
+    return c.json({ error: "Oh Snap. Server Error" });
   }
 });

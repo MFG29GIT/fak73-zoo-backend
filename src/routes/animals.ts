@@ -1,5 +1,8 @@
 import { Hono } from "hono";
 import { Animal } from "../models/animals.js";
+import { AnimalSchema } from "../schemas/animals.js";
+import { AssignEnclosureSchema } from "../schemas/assignEnclosure.js";
+import { AssignVetSchema } from "../schemas/assignVet.js";
 
 export const animal = new Hono();
 
@@ -31,19 +34,6 @@ animal.get("/:id", async (c) => {
   }
 });
 
-// Neues Tier einfügen
-animal.post("/insertAn", async (c) => {
-  try {
-    const body = await c.req.json();
-    const newAnimal = await Animal.insertAnimal(body);
-
-    return c.json({ data: newAnimal }, 201);
-  } catch (err) {
-    console.error("❌ Fehler beim Einfügen:", err);
-    return c.json({ message: "Fehler beim Einfügen des Tieres" }, 500);
-  }
-});
-
 // Tier Löschen(verstorben)
 animal.delete("/:id", async (c) => {
   try {
@@ -57,25 +47,53 @@ animal.delete("/:id", async (c) => {
   }
 });
 
+// Neues Tier einfügen
+animal.post("/insertAn", async (c) => {
+  try {
+    const body = await c.req.json();
+    const result = AnimalSchema.safeParse(body);
+
+    if (result.success === false) {
+      return c.json({
+        errors: result.error.flatten().fieldErrors,
+      });
+    }
+    // Data is valid here
+
+    const newAnimal = await Animal.insertAnimal(body);
+
+    return c.json({ data: newAnimal }, 201);
+  } catch (err) {
+    console.error("❌ Fehler beim Einfügen:", err);
+    return c.json({ message: "Fehler beim Einfügen des Tieres" }, 500);
+  }
+});
+
 // Tier einem Gehege zuweisen
-animal.post("/:id/assign-compound", async (c) => {
+animal.post("/:id/assign-enclosure", async (c) => {
   try {
     const id = Number(c.req.param().id);
     const enclosureId = Number(c.req.query("compoundId"));
 
-    if (isNaN(enclosureId)) {
-      return c.json(
-        { message: "Query parameter 'compoundId' must be a valid number" },
-        400
-      );
+    const params = AssignEnclosureSchema.safeParse({
+      id: Number(id),
+      enclosureId: Number(enclosureId),
+    });
+
+    if (params.success === false) {
+      return c.json({ error: params.error.flatten().fieldErrors });
     }
 
     const updatedAnimal = await Animal.assignAnimal(id, enclosureId);
 
     return c.json({ data: updatedAnimal }, 200);
-  } catch (err) {
-    console.error("❌ Fehler beim Zuweisen des Tiers:", err);
-    return c.json({ message: "Fehler beim Zuweisen des Tieres" }, 500);
+  } catch (error) {
+    console.error(error);
+    if (error instanceof SyntaxError) {
+      return c.json({ error: "Well, thats not JSON my friend." });
+    }
+    // not handled errors
+    return c.json({ error: "Oh Snap. Server Error" });
   }
 });
 
@@ -85,17 +103,23 @@ animal.post("/:id/assign-veterinarian", async (c) => {
     const id = Number(c.req.param().id);
     const personalId = Number(c.req.query("personalId"));
 
-    if (isNaN(personalId)) {
-      return c.json(
-        { message: "Query parameter 'personalId' must be a valid number" },
-        400
-      );
+    const params = AssignVetSchema.safeParse({
+      id: Number(id),
+      personalId: Number(personalId),
+    });
+
+    if (params.success === false) {
+      return c.json({ error: params.error.flatten().fieldErrors });
     }
 
     const updatedAnimal = await Animal.assignVet(id, personalId);
     return c.json({ data: updatedAnimal }, 200);
-  } catch (err) {
-    console.error("❌ Fehler beim Zuweisen des Tierarztes:", err);
-    return c.json({ message: "Fehler beim Zuweisen des Tierarztes" }, 500);
+  } catch (error) {
+    console.error(error);
+    if (error instanceof SyntaxError) {
+      return c.json({ error: "Well, thats not JSON my friend." });
+    }
+    // not handled errors
+    return c.json({ error: "Oh Snap. Server Error" });
   }
 });

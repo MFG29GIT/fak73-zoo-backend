@@ -1,11 +1,14 @@
 import type { QueryConfig } from "pg";
 import { pool } from "../clients/pool.js";
 import { HTTPException } from "hono/http-exception";
-import type { AnimalType } from "../types.js";
+import type { AnimalType } from "../schemas/animals.js";
 
 export class Animal {
   static async findAll() {
     const result = await pool.query(`SELECT * FROM "Tier"`);
+    if (result.rowCount === 0) {
+      throw new HTTPException(404, { message: "no animals found" });
+    }
     return result.rows;
   }
   static async findById(id: string) {
@@ -13,8 +16,10 @@ export class Animal {
       text: `SELECT * FROM "Tier" WHERE id = $1`,
       values: [id],
     };
-
     const result = await pool.query(query);
+    if (result.rowCount === 0) {
+      throw new HTTPException(404, { message: "no animal found" });
+    }
     return result.rows;
   }
   static async insertAnimal(newAnimal: AnimalType) {

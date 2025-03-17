@@ -1,11 +1,7 @@
 import type { QueryConfig } from "pg";
-import type {
-  AnimalType,
-  EnclosureType,
-  patchEnclosureBody,
-  StaffType,
-} from "../types.js";
 import { pool } from "../clients/pool.js";
+import type { EnclosureType } from "../schemas/enclosures.js";
+import type { PatchEnclosureBodyType } from "../schemas/patchEnclosureBody.js";
 
 export class Enclosure {
   static async findAll() {
@@ -21,7 +17,7 @@ export class Enclosure {
     const result = await pool.query(query);
     return result.rows;
   }
-  static async insertEmploye(newEnclosure: EnclosureType) {
+  static async insertEnclosure(newEnclosure: EnclosureType) {
     const query: QueryConfig = {
       text: `INSERT INTO "Gehege"(name,groesse,kosten) VALUES($1, $2, $3)`,
       values: [newEnclosure.name, newEnclosure.size, newEnclosure.cost],
@@ -40,7 +36,7 @@ export class Enclosure {
     return result.rows;
   }
 
-  static async patchEnclosure(id: string, patchBody: patchEnclosureBody) {
+  static async patchEnclosure(id: string, patchBody: PatchEnclosureBodyType) {
     const enclosureQueryResult = await pool.query(
       'SELECT * FROM "Gehege" WHERE id = $1',
       [id]
@@ -50,7 +46,7 @@ export class Enclosure {
     const patchObject = {
       name: patchBody.name,
       size: patchBody.size,
-      uokeepCost: patchBody.upkeepCost,
+      upKeepCost: patchBody.upKeepCost,
     };
 
     const updateBody = {

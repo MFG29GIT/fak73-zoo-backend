@@ -1,25 +1,25 @@
 import type { QueryConfig } from "pg";
 import { pool } from "../clients/pool.js";
-import type { EmployeType } from "../schemas/employe.js";
+import type { DonationType } from "../schemas/donations.js";
 
-export class Employe {
+export class Donation {
   static async findAll() {
-    const result = await pool.query(`SELECT * FROM "Personal"`);
+    const result = await pool.query(`SELECT * FROM "Spende"`);
     return result.rows;
   }
   static async findById(id: string) {
     const query: QueryConfig = {
-      text: `SELECT * FROM "Personal" WHERE id = $1`,
+      text: `SELECT * FROM "Spende" WHERE id = $1`,
       values: [id],
     };
 
     const result = await pool.query(query);
     return result.rows;
   }
-  static async insertEmploye(newEmploye: EmployeType) {
+  static async insertDonation(newDonation: DonationType) {
     const query: QueryConfig = {
-      text: `INSERT INTO "Personal"(name,rolle,gehalt) VALUES($1, $2, $3)`,
-      values: [newEmploye.name, newEmploye.role, newEmploye.salary],
+      text: `INSERT INTO "Spende"(spender,pdfUrl) VALUES($1, $2)`,
+      values: [newDonation.donor, newDonation.pdfUrl],
     };
 
     const result = await pool.query(query);
@@ -27,7 +27,7 @@ export class Employe {
   }
   static async deleteById(id: string) {
     const query: QueryConfig = {
-      text: `DELETE FROM "Personal" WHERE id = $1`,
+      text: `DELETE FROM "Spende" WHERE id = $1`,
       values: [id],
     };
 
